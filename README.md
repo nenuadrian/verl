@@ -1,9 +1,9 @@
-<div align="center">
- 👋 Hi, everyone!
-    verl is a RL training library initiated by <b>ByteDance Seed team</b> and maintained by the verl community.
-    <br>
-    <br>
-</div>
+```
+conda install conda-forge::nvidia-apex
+pip install --no-build-isolation transformer_engine[pytorch]
+```
+
+
 
 <div align="center">
 
