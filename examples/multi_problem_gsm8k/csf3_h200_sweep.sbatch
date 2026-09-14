@@ -4,7 +4,6 @@
 
 #SBATCH --job-name=mp-gsm8k
 #SBATCH --partition=gpuH
-#SBATCH --qos=gpu-h200-fse
 #SBATCH --gres=gpu:h200:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
