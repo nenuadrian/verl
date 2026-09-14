@@ -36,11 +36,19 @@ count fixed instead (K× more problems per step at larger K) if you want the oth
 Two things cannot be held fixed at the same time as the problem budget, and both are
 inherent to the design rather than fixable:
 
-- **Sequence length grows with K.** K=8 generates ~4× the tokens of K=2 per step.
+- **Sequence length grows with K.** K=8 generates ~4× the tokens of K=2 per step, so
+  wall-clock per step is not comparable even though the problem budget is.
 - **GRPO group count shrinks with K** under `problems` mode (fewer prompts/step, same
   group size `rollout.n`), so advantage estimation sees fewer groups per update.
 
 Report both, don't hide them.
+
+What *is* matched, deliberately: the **generation budget per problem**. Response length
+is `RESPONSE_TOKENS_PER_PROBLEM * K` (384 by default), not a constant plus a slope — a
+fixed additive term would hand low-K runs a larger per-problem token budget and bias
+the sweep against the packed conditions. Prompt limits are sized from the measured
+Qwen2.5 maxima over the built shards (288 / 350 / 540 / 854 tokens at K = 1 / 2 / 4 / 8),
+so nothing is ever truncated.
 
 ### The ablation that actually attributes the effect
 

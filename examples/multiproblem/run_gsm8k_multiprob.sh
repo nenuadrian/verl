@@ -47,12 +47,18 @@ fi
 # One optimizer update per fresh rollout batch, at every K.
 ppo_mini_batch_size="${PPO_MINI_BATCH_SIZE:-${train_batch_size}}"
 
-# Defaults grow with K; override from the measured percentiles that
-# prepare_data.py --tokenizer prints.  truncation=error below makes an
+# Prompt budget grows with K.  Measured Qwen2.5 prompt maxima over the built
+# shards are 288/350/540/854 tokens for K=1/2/4/8, so these defaults clear the
+# longest real prompt at every K with headroom.  truncation=error below makes an
 # undersized limit fail loudly rather than silently drop problems and break the
 # matched-budget control.
 max_prompt_length="${MAX_PROMPT_LENGTH:-$(( 256 + 128 * k ))}"
-max_response_length="${MAX_RESPONSE_LENGTH:-$(( 256 + 256 * k ))}"
+# Generation budget is strictly proportional to K, so every problem gets the
+# same number of tokens to solve in at every K.  A fixed additive term would
+# hand low-K runs a larger per-problem budget and quietly bias the sweep against
+# the packed conditions.
+response_tokens_per_problem="${RESPONSE_TOKENS_PER_PROBLEM:-384}"
+max_response_length="${MAX_RESPONSE_LENGTH:-$(( response_tokens_per_problem * k ))}"
 max_model_len="${MAX_MODEL_LEN:-$(( max_prompt_length + max_response_length ))}"
 
 # Remove-padding is off by default: verl's rmpad path imports flash_attn
