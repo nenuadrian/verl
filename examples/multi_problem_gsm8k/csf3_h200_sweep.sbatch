@@ -29,6 +29,9 @@ DATA_DIR=${DATA_DIR:-${WORK_ROOT}/data}
 ENV_PYTHON=${ENV_PYTHON:-${HOME}/.conda/envs/verl/bin/python}
 PROJECT_NAME=${PROJECT_NAME:-multi-problem-gsm8k}
 
+ENV_PREFIX=$(cd -- "$(dirname -- "${ENV_PYTHON}")/.." && pwd)
+export LD_LIBRARY_PATH="${ENV_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
 mkdir -p "${WORK_ROOT}/logs" "${WORK_ROOT}/ray" "${WORK_ROOT}/checkpoints"
 export HF_HOME=${HF_HOME:-${WORK_ROOT}/hf-cache}
 export RAY_TMPDIR=${RAY_TMPDIR:-/tmp/${USER}/ray-k${K}}
