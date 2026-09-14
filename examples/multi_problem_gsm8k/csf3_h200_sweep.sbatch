@@ -31,7 +31,7 @@ PROJECT_NAME=${PROJECT_NAME:-multi-problem-gsm8k}
 
 mkdir -p "${WORK_ROOT}/logs" "${WORK_ROOT}/ray" "${WORK_ROOT}/checkpoints"
 export HF_HOME=${HF_HOME:-${WORK_ROOT}/hf-cache}
-export RAY_TMPDIR=${RAY_TMPDIR:-${WORK_ROOT}/ray/k${K}}
+export RAY_TMPDIR=${RAY_TMPDIR:-/tmp/${USER}/ray-k${K}}
 export WANDB_PROJECT=${WANDB_PROJECT:-${PROJECT_NAME}}
 export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen2_5_3b-matched-k-sweep}
 export WANDB_NAME=${WANDB_NAME:-qwen2_5_3b-grpo-k${K}}
