@@ -35,7 +35,13 @@ ENV_PYTHON=${ENV_PYTHON:-${HOME}/.conda/envs/verl/bin/python}
 PROJECT_NAME=${PROJECT_NAME:-multi-problem-gsm8k}
 
 ENV_PREFIX=$(cd -- "$(dirname -- "${ENV_PYTHON}")/.." && pwd)
-export LD_LIBRARY_PATH="${ENV_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+# torch 2.11+cu130 ships its CUDA 13 runtime as nvidia/* wheels. vLLM's CuMem
+# allocator (pulled in by rollout.free_cache_engine=True) dlopens libnvrtc.so.13
+# from there, and without it engine construction dies with the misleading
+# "cumem allocator is not supported on current platform". These must precede the
+# conda prefix, whose CUDA is 12.8.
+NVIDIA_LIB_PATH=$("${ENV_PYTHON}" -c "import glob, os.path, nvidia; print(':'.join(sorted(glob.glob(os.path.join(os.path.dirname(nvidia.__file__), '*', 'lib')))))" 2>/dev/null || true)
+export LD_LIBRARY_PATH="${NVIDIA_LIB_PATH:+${NVIDIA_LIB_PATH}:}${ENV_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
 mkdir -p "${WORK_ROOT}/logs" "${WORK_ROOT}/ray" "${WORK_ROOT}/checkpoints"
 export HF_HOME=${HF_HOME:-${WORK_ROOT}/hf-cache}
