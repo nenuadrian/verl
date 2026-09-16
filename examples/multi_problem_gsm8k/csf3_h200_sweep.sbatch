@@ -30,6 +30,14 @@ DATA_DIR=${DATA_DIR:-${WORK_ROOT}/data}
 # not declare it, so the rollout replica fails to import. Keep the shim in a
 # private dir rather than mutating the shared conda env:
 #   python -m pip install --no-deps --target "${WORK_ROOT}/.deps" jmespath
+#
+# The same dir also shadows flash_attn. The conda build targets torch 2.8 and
+# fails under torch 2.11 with an "undefined symbol" ImportError; vLLM probes for
+# its kernels under suppress(ModuleNotFoundError), which does not catch that, so
+# a broken build kills engine startup rather than falling back. A package whose
+# __init__ raises ModuleNotFoundError restores the intended fallback:
+#   mkdir -p "${WORK_ROOT}/.deps/flash_attn" && printf 'raise ModuleNotFoundError\n' \
+#     > "${WORK_ROOT}/.deps/flash_attn/__init__.py"
 DEPS_DIR=${DEPS_DIR:-${WORK_ROOT}/.deps}
 ENV_PYTHON=${ENV_PYTHON:-${HOME}/.conda/envs/verl/bin/python}
 PROJECT_NAME=${PROJECT_NAME:-multi-problem-gsm8k}

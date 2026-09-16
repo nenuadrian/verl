@@ -40,6 +40,11 @@ MAX_MODEL_LENGTH=$((MAX_PROMPT_LENGTH + MAX_RESPONSE_LENGTH))
 
 ROLLOUT_N=${ROLLOUT_N:-8}
 NGPUS_PER_NODE=${NGPUS_PER_NODE:-2}
+# Off by default: verl's remove-padding path imports flash_attn unguarded, and
+# flash_attn is unusable wherever it was built against a different torch. The
+# cost is throughput only, and it is identical at every K, so it cannot bias
+# the sweep. Set USE_REMOVE_PADDING=True where flash_attn matches torch.
+USE_REMOVE_PADDING=${USE_REMOVE_PADDING:-False}
 ACTOR_LR=${ACTOR_LR:-1e-6}
 TOTAL_EPOCHS=${TOTAL_EPOCHS:-4}
 TEST_FREQ=${TEST_FREQ:-10}
@@ -76,7 +81,7 @@ python3 -m verl.trainer.main_ppo \
     reward.custom_reward_function.name=compute_score \
     actor_rollout_ref.model.path="${MODEL_PATH}" \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
-    actor_rollout_ref.model.use_remove_padding=True \
+    actor_rollout_ref.model.use_remove_padding=${USE_REMOVE_PADDING} \
     +actor_rollout_ref.model.override_config.attn_implementation=eager \
     actor_rollout_ref.actor.strategy=fsdp \
     actor_rollout_ref.actor.optim.lr=${ACTOR_LR} \
