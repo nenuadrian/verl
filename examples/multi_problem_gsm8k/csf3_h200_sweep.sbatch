@@ -5,9 +5,9 @@
 #SBATCH --job-name=mp-gsm8k
 #SBATCH --partition=gpuH
 #SBATCH --account=gpu-h200-fse-pgdr
-#SBATCH --gres=gpu:h200:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=128G
+#SBATCH --gres=gpu:h200:2
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=320G
 #SBATCH --time=1-00:00:00
 #SBATCH --output=/mnt/h200-scratch/%u/multi-problem-gsm8k/logs/%x-%A_%a.out
 #SBATCH --error=/mnt/h200-scratch/%u/multi-problem-gsm8k/logs/%x-%A_%a.err
