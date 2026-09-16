@@ -26,6 +26,11 @@ fi
 WORK_ROOT=${WORK_ROOT:-/mnt/h200-scratch/${USER}/multi-problem-gsm8k}
 REPO_DIR=${REPO_DIR:-${WORK_ROOT}/verl}
 DATA_DIR=${DATA_DIR:-${WORK_ROOT}/data}
+# vLLM 0.24 imports jmespath transitively via its SageMaker entrypoint but does
+# not declare it, so the rollout replica fails to import. Keep the shim in a
+# private dir rather than mutating the shared conda env:
+#   python -m pip install --no-deps --target "${WORK_ROOT}/.deps" jmespath
+DEPS_DIR=${DEPS_DIR:-${WORK_ROOT}/.deps}
 ENV_PYTHON=${ENV_PYTHON:-${HOME}/.conda/envs/verl/bin/python}
 PROJECT_NAME=${PROJECT_NAME:-multi-problem-gsm8k}
 
@@ -63,7 +68,7 @@ PY
 
 "${ENV_PYTHON}" examples/multi_problem_gsm8k/prepare_data.py --help >/dev/null
 PATH="$(dirname "${ENV_PYTHON}"):${PATH}" \
-PYTHONPATH="${REPO_DIR}${PYTHONPATH:+:${PYTHONPATH}}" \
+PYTHONPATH="${DEPS_DIR}:${REPO_DIR}${PYTHONPATH:+:${PYTHONPATH}}" \
 K="${K}" \
 DATA_DIR="${DATA_DIR}" \
 CHECKPOINT_DIR="${WORK_ROOT}/checkpoints/k${K}" \
