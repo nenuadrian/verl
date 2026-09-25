@@ -2547,3 +2547,14 @@ def compute_policy_loss_bypass_mode(
     pg_metrics.update(rollout_metrics)
 
     return pg_loss, pg_metrics
+
+# --- TPO (arXiv:2604.06159) ---------------------------------------------------
+# Imported at module end, after POLICY_LOSS_REGISTRY / ADV_ESTIMATOR_REGISTRY and
+# every helper exist, so tpo_verl's `from ... core_algos import ...` resolves
+# against this partially-initialised-but-complete module. It must live here rather
+# than in the launcher: under Ray the policy loss runs inside each FSDP actor
+# worker process, which a driver-side monkeypatch would never reach.
+try:
+    import tpo_verl  # noqa: F401,E402
+except Exception as _tpo_exc:  # pragma: no cover
+    logger.warning("TPO extension not loaded: %s", _tpo_exc)

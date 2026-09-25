@@ -248,6 +248,22 @@ def compute_advantage(
     else:
         # handle all other adv estimator type other than GAE and GRPO
         adv_estimator_fn = core_algos.get_adv_estimator_fn(adv_estimator)
+        # TPO needs the rollout-time sequence log-probs for its p^old anchor.
+        if str(getattr(adv_estimator, "value", adv_estimator)) == "tpo":
+            adv_kwargs_tpo = {
+                "token_level_rewards": data.batch["token_level_rewards"],
+                "response_mask": data.batch["response_mask"],
+                "index": data.non_tensor_batch["uid"],
+                "old_log_probs": data.batch["old_log_probs"],
+                "config": config,
+            }
+            advantages, returns = adv_estimator_fn(**adv_kwargs_tpo)
+            data.batch["advantages"] = advantages
+            data.batch["returns"] = returns
+            data.meta_info["tpo_metrics"] = dict(
+                getattr(adv_estimator_fn, "last_diagnostics", {})
+            )
+            return data
         adv_kwargs = {
             "token_level_rewards": data.batch["token_level_rewards"],
             "response_mask": data.batch["response_mask"],
@@ -1673,6 +1689,7 @@ class RayPPOTrainer:
                             norm_adv_by_std_in_grpo=norm_adv_by_std_in_grpo,
                             config=self.config.algorithm,
                         )
+                        metrics.update(batch.meta_info.pop("tpo_metrics", {}))
                     # update critic
                     if self.use_critic:
                         with marked_timer("update_critic", timing_raw, color="pink"):

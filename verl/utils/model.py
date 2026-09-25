@@ -646,7 +646,7 @@ def load_valuehead_model(local_path, torch_dtype, model_config, trust_remote_cod
             pretrained_model_name_or_path=local_path,
             torch_dtype=torch_dtype,
             config=model_config,
-            attn_implementation="flash_attention_2",
+            attn_implementation=os.environ.get("VERL_ATTN_IMPL", "flash_attention_2"),
             trust_remote_code=trust_remote_code,
         )
         return model
@@ -671,7 +671,7 @@ def load_valuehead_model(local_path, torch_dtype, model_config, trust_remote_cod
         pretrained_model_name_or_path=local_path,
         torch_dtype=torch_dtype,
         config=model_config,
-        attn_implementation="flash_attention_2",
+        attn_implementation=os.environ.get("VERL_ATTN_IMPL", "flash_attention_2"),
         trust_remote_code=trust_remote_code,
     )
     # vlm models
